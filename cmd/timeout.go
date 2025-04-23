@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mirceanton/tesmartctl/internal/tesmart"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -28,12 +29,14 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := viper.GetString("ip_address")
 		port := viper.GetString("port")
+		log.Debugf("Setting LED timeout to KVM at %s:%s...\n", ip, port)
+
 		arg := strings.ToLower(args[0])
+		log.Debugf("Desired value is: %v", arg)
 
 		var command string
 		var actionText string
 
-		// Determine the command based on the argument
 		switch arg {
 		case "short", "10":
 			command = "aabb03030aee"
@@ -47,15 +50,16 @@ Examples:
 		default:
 			return fmt.Errorf("invalid timeout value: %s (use 'short'/'long'/'never' or '10'/'30'/'0')", arg)
 		}
+		log.Debugf("Given action translates to status: %s", actionText)
+		log.Debugf("HEX command for desired action is: %s", command)
 
-		// Send the command - timeout commands don't expect a response like buzzer commands
+		log.Infof("Sending command %s to %s:%s...", command, ip, port)
 		_, err := tesmart.SendCommand(ip, port, command, false, debug)
 		if err != nil {
 			return fmt.Errorf("command failed: %v", err)
 		}
 
 		fmt.Printf("LED timeout %s\n", actionText)
-
 		return nil
 	},
 }

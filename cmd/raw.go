@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mirceanton/tesmartctl/internal/tesmart"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -26,17 +27,19 @@ Reference: https://support.tesmart.com/hc/en-us/article_attachments/277123624943
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := viper.GetString("ip_address")
 		port := viper.GetString("port")
+		log.Debugf("Sending raw command to KVM at %s:%s...\n", ip, port)
+
 		command := args[0]
+		log.Debugf("Command to send %s\n", command)
 
-		if debug {
-			fmt.Printf("Sending command %s to %s:%s...\n", command, ip, port)
-		}
-
+		log.Infof("Sending command %s to %s:%s...", command, ip, port)
 		response, err := tesmart.SendCommand(ip, port, command, true, debug)
 		if err != nil {
 			return fmt.Errorf("command failed: %v", err)
 		}
+		log.Debugf("Got response: %s", response)
 
+		log.Debugf("Verifying the response...")
 		if response != "" {
 			fmt.Printf("%s\n", response)
 		} else {

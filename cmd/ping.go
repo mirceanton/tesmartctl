@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -17,13 +18,10 @@ var pingCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := viper.GetString("ip_address")
 		port := viper.GetString("port")
-
-		fmt.Printf("Testing TCP connection to KVM at %s:%s...\n", ip, port)
-
-		// Create the address
 		address := net.JoinHostPort(ip, port)
+		log.Infof("Testing TCP connection to KVM at %s...\n", address)
 
-		// Establish TCP connection with timeout
+		log.Debug("Establish TCP connection with timeout")
 		conn, err := net.DialTimeout("tcp", address, 5*time.Second)
 		if err != nil {
 			fmt.Printf("❌ Connection failed: %v\n", err)

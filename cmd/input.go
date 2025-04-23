@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/mirceanton/tesmartctl/internal/tesmart"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -30,38 +31,40 @@ var inputGetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := viper.GetString("ip_address")
 		port := viper.GetString("port")
+		log.Debugf("Getting current active input from KVM at %s:%s...\n", ip, port)
 
-		if debug {
-			fmt.Printf("Getting current active input from KVM at %s:%s...\n", ip, port)
-		}
-
-		// Command to get the current input: 0xAA 0xBB 0x03 0x10 0x00 0xEE
+		log.Debugf("Formatting the HEX command...")
 		command := "aabb031000ee"
+		log.Debugf("HEX command for desired action is: %s", command)
 
-		// Send the command - this one expects a response
+		log.Infof("Sending command %s to %s:%s...", command, ip, port)
 		response, err := tesmart.SendCommand(ip, port, command, true, debug)
 		if err != nil {
 			return fmt.Errorf("failed to get current input: %v", err)
 		}
 
-		// Parse the response to get the active port
+		log.Debugf("Verifying the response...")
 		if len(response) < 12 {
 			return fmt.Errorf("invalid response length: %s", response)
 		}
+		log.Debugf("Got response: %s", response)
 
+		log.Debugf("Extracting the port from the response...")
 		// The active port is in the 5th byte (10th and 11th characters in the hex string)
 		portHex := response[8:10]
+		log.Debugf("HEX port number from response: %s", portHex)
 
 		portNum, err := strconv.ParseUint(portHex, 16, 8)
 		if err != nil {
 			return fmt.Errorf("failed to parse port number from response: %v", err)
 		}
+		log.Debugf("Translated port number into int: %v", portNum)
 
-		// TeSmart port numbers are 0-based in the protocol
+		log.Debugf("Adjusting port number assuming 0-based in protocol...")
 		portNum = portNum + 1
+		log.Debugf("Adjusted from 0-base port number: %v", portNum)
 
 		fmt.Println(portNum)
-
 		return nil
 	},
 }
@@ -81,61 +84,60 @@ Example:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := viper.GetString("ip_address")
 		port := viper.GetString("port")
+		log.Debugf("Setting active input to KVM at %s:%s...\n", ip, port)
 
-		// Parse the port number from the argument
+		log.Debugf("Parsing the port number from the argument...")
 		portNum, err := strconv.Atoi(args[0])
 		if err != nil {
 			return fmt.Errorf("invalid port number: %s", args[0])
 		}
+		log.Debugf("Desired port is: %v", portNum)
 
-		// Validate the port number
+		log.Debugf("Validating the port number...")
 		if portNum < 1 || portNum > 16 {
 			return fmt.Errorf("port number must be between 1 and 16, got: %d", portNum)
 		}
 
-		// Format the command: 0xAA 0xBB 0x03 0x01 [port] 0xEE
+		log.Debugf("Formatting the HEX command...")
 		command := fmt.Sprintf("aabb0301%02xee", portNum)
+		log.Debugf("HEX command for desired action is: %s", command)
 
-		if debug {
-			fmt.Printf("Switching to input %d on KVM at %s:%s...\n", portNum, ip, port)
-		}
-
-		// Send the command - this one expects a response
+		log.Infof("Sending command %s to %s:%s...", command, ip, port)
 		response, err := tesmart.SendCommand(ip, port, command, true, debug)
 		if err != nil {
 			return fmt.Errorf("failed to switch input: %v", err)
 		}
 
-		// Verify the response indicates success
+		log.Debugf("Verifying the response...")
 		if len(response) < 12 {
 			return fmt.Errorf("invalid response length: %s", response)
 		}
+		log.Debugf("Got response: %s", response)
 
 		// For input switching, the KVM typically responds with 0xAA 0xBB 0x03 0x11 [new-port] 0xEE
 		// Let's check if the response contains the expected pattern
-		respPrefix := strings.HasPrefix(response, "aabb0311")
-
-		if !respPrefix {
-			if debug {
-				fmt.Printf("Unexpected response format: %s\n", response)
-			}
-			fmt.Println("Switch command sent, but received unexpected response")
+		if !strings.HasPrefix(response, "aabb0311") {
+			log.Infof("Unexpected response format: %s\n", response)
+			log.Warnf("Switch command sent, but received unexpected response")
 			return nil
 		}
 
-		// Extract the new active port from the response
+		log.Debugf("Extracting the new active port from the response...")
 		respPortHex := response[8:10]
+		log.Debugf("HEX port number from response: %s", respPortHex)
+
 		respPortNum, err := strconv.ParseUint(respPortHex, 16, 8)
 		if err != nil {
-			fmt.Println("Successfully switched input, but couldn't parse response details")
+			log.Warnf("Successfully switched input, but couldn't parse response details")
 			return nil
 		}
+		log.Debugf("Translated port number into int: %v", respPortNum)
 
-		// TeSmart port numbers are 0-based in the protocol
+		log.Debugf("Adjusting port number assuming 0-based in protocol...")
 		respPortNum++
+		log.Debugf("Adjusted from 0-base port number: %v", respPortNum)
 
 		fmt.Printf("switched to input %d\n", respPortNum)
-
 		return nil
 	},
 }
@@ -143,5 +145,6 @@ Example:
 func init() {
 	inputCmd.AddCommand(inputGetCmd)
 	inputCmd.AddCommand(inputSetCmd)
+
 	rootCmd.AddCommand(inputCmd)
 }

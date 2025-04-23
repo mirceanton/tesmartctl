@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mirceanton/tesmartctl/internal/tesmart"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -25,14 +26,14 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := viper.GetString("ip_address")
 		port := viper.GetString("port")
+		log.Debugf("Adjusting buzzer status on KVM at %s:%s...\n", ip, port)
 
-		// Normalize the argument
 		arg := strings.ToLower(args[0])
+		log.Debugf("Desired status: %s", arg)
 
 		var command string
 		var actionText string
 
-		// Determine the command based on the argument
 		switch arg {
 		case "mute", "0":
 			command = "aabb03020000ee"
@@ -43,7 +44,10 @@ Examples:
 		default:
 			return fmt.Errorf("invalid argument: %s (use 'mute'/'unmute' or '0'/'1')", arg)
 		}
+		log.Debugf("Given action translates to status: %s", actionText)
+		log.Debugf("HEX command for desired action is: %s", command)
 
+		log.Infof("Sending command %s to %s:%s...", command, ip, port)
 		_, err := tesmart.SendCommand(ip, port, command, false, debug)
 		if err != nil {
 			return fmt.Errorf("command failed: %v", err)

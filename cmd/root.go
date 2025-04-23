@@ -59,7 +59,6 @@ func initConfig() {
 	// Set default values
 	viper.SetDefault("ip_address", "192.168.0.10")
 	viper.SetDefault("port", "5000")
-	viper.SetDefault("num_inputs", 8)
 
 	// Read in environment variables that match
 	viper.AutomaticEnv()
