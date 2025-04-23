@@ -26,7 +26,7 @@ implementing commands that aren't yet supported by the CLI.
 			fmt.Printf("Sending command %s to %s:%s...\n", command, ip, port)
 		}
 
-		response, err := tesmart.SendCommand(ip, port, command, debug)
+		response, err := tesmart.SendCommand(ip, port, command, true, debug)
 		if err != nil {
 			return fmt.Errorf("command failed: %v", err)
 		}

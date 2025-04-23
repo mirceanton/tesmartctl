@@ -10,7 +10,8 @@ import (
 
 // SendCommand sends a raw hex command string to the KVM switch and returns the response as a hex string
 // The input should be a hex string (without 0x prefix or spaces)
-func SendCommand(ipAddress, port, hexCommand string, debug bool) (string, error) {
+// If expectResponse is false, it won't wait for a response and will return empty string
+func SendCommand(ipAddress, port, hexCommand string, expectResponse bool, debug bool) (string, error) {
 	// Convert hex string to bytes
 	if debug {
 		fmt.Print("Deconding command bytes...\n")
@@ -47,6 +48,14 @@ func SendCommand(ipAddress, port, hexCommand string, debug bool) (string, error)
 	}
 	if debug {
 		fmt.Println("Command sent successfully")
+	}
+
+	// If we don't expect a response, return early
+	if !expectResponse {
+		if debug {
+			fmt.Println("Not waiting for response as requested")
+		}
+		return "", nil
 	}
 
 	// Read response (expecting 6 bytes for TeSmart protocol)
