@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/mirceanton/tesmartctl/internal/tesmart"
 	"github.com/spf13/cobra"
@@ -78,7 +79,63 @@ Example:
 `,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// TODO
+		ip := viper.GetString("ip_address")
+		port := viper.GetString("port")
+
+		// Parse the port number from the argument
+		portNum, err := strconv.Atoi(args[0])
+		if err != nil {
+			return fmt.Errorf("invalid port number: %s", args[0])
+		}
+
+		// Validate the port number
+		if portNum < 1 || portNum > 16 {
+			return fmt.Errorf("port number must be between 1 and 16, got: %d", portNum)
+		}
+
+		// Format the command: 0xAA 0xBB 0x03 0x01 [port] 0xEE
+		command := fmt.Sprintf("aabb0301%02xee", portNum)
+
+		if debug {
+			fmt.Printf("Switching to input %d on KVM at %s:%s...\n", portNum, ip, port)
+		}
+
+		// Send the command - this one expects a response
+		response, err := tesmart.SendCommand(ip, port, command, true, debug)
+		if err != nil {
+			return fmt.Errorf("failed to switch input: %v", err)
+		}
+
+		// Verify the response indicates success
+		if len(response) < 12 {
+			return fmt.Errorf("invalid response length: %s", response)
+		}
+
+		// For input switching, the KVM typically responds with 0xAA 0xBB 0x03 0x11 [new-port] 0xEE
+		// Let's check if the response contains the expected pattern
+		respPrefix := strings.HasPrefix(response, "aabb0311")
+
+		if !respPrefix {
+			if debug {
+				fmt.Printf("Unexpected response format: %s\n", response)
+			}
+			fmt.Println("Switch command sent, but received unexpected response")
+			return nil
+		}
+
+		// Extract the new active port from the response
+		respPortHex := response[8:10]
+		respPortNum, err := strconv.ParseUint(respPortHex, 16, 8)
+		if err != nil {
+			fmt.Println("Successfully switched input, but couldn't parse response details")
+			return nil
+		}
+
+		// TeSmart port numbers are 0-based in the protocol
+		respPortNum++
+
+		fmt.Printf("switched to input %d\n", respPortNum)
+
 		return nil
 	},
 }
