@@ -19,7 +19,8 @@ Examples:
   tesmartctl buzzer mute    # Mute the buzzer
   tesmartctl buzzer unmute  # Unmute the buzzer
   tesmartctl buzzer 0       # Mute the buzzer
-  tesmartctl buzzer 1       # Unmute the buzzer`,
+  tesmartctl buzzer 1       # Unmute the buzzer
+`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := viper.GetString("ip_address")

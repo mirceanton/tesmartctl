@@ -15,6 +15,12 @@ var sendRawCmd = &cobra.Command{
 	Long: `Send raw hexadecimal commands directly to the KVM switch.
 This is useful for experimenting with the KVM protocol or for
 implementing commands that aren't yet supported by the CLI.
+
+Examples:
+	tesmartctl raw aabb031000ee # read current active input
+	tesmartctl raw aabb030200ee # mute buzzer
+
+Reference: https://support.tesmart.com/hc/en-us/article_attachments/27712362494361
 `,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

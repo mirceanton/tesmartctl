@@ -12,7 +12,14 @@ import (
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage configuration settings",
-	Long:  `View or modify configuration settings for the KVM connection.`,
+	Long: `View or modify configuration settings for the KVM connection.
+
+Examples:
+	tesmartctl config get     # Show current config
+	tesmartctl config set ip 10.0.0.4  # Set KVM IP in config
+	tesmartctl config set port 9000    # Set KVM port in config
+	tesmartctl config set inputs 8     # Set number of inputs available on KVM in config
+`,
 }
 
 // getConfigCmd represents the config get subcommand
