@@ -2,3 +2,7 @@
 go = "1.24.2"
 goreleaser = "2.8.0"
 golangci-lint = "2.1.4"
+
+# Miscellaneous Tools
+actionlint = "1.7.7"
+"npm:@commitlint/cli" = "19.8.0"

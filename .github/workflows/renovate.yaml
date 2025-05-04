@@ -1,8 +1,10 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Renovate
+permissions: { contents: read }
 
 on:
+  schedule: [{cron: '0 * * * *'}]
   workflow_dispatch:
     inputs:
       dry-run:
@@ -22,9 +24,6 @@ on:
         description: Renovate Version
         default: latest
         required: true
-
-  schedule:
-    - cron: "0 * * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -49,7 +48,7 @@ jobs:
       - name: Run Renovate
         uses: renovatebot/github-action@8ac70de2fe55752c573155866e30735411e3b61c # v41.0.22
         with:
-          configurationFile: .github/renovate.json5
+          configurationFile: .renovaterc.json
           token: "${{ steps.app-token.outputs.token }}"
           renovate-version: "${{ inputs.version || 'latest' }}"
         env:
