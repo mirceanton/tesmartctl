@@ -8,7 +8,7 @@
         ":disableRateLimiting",
         ":semanticCommits",
         ":timezone(Europe/Bucharest)",
-        "github>mirceanton/renovate-config//automerge/all.json5",
+        "github>mirceanton/renovate-config//auto-merge/all.json5",
         "github>mirceanton/renovate-config//labels/all.json5",
         "github>mirceanton/renovate-config//semantic-commits/all.json5"
     ]
