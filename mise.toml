@@ -1,7 +1,7 @@
 [tools]
 go = "1.24.2"
 goreleaser = "2.8.0"
-golangci-lint = "2.1.4"
+golangci-lint = "2.1.5"
 
 # Miscellaneous Tools
 actionlint = "1.7.7"
