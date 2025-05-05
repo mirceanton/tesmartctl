@@ -33,7 +33,7 @@ jobs:
         with: { fetch-depth: 0 }
 
       - name: Setup mise
-        uses: jdx/mise-action@v2.1.2
+        uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
 
       - name: Run goreleaser (dry-run)
         if: github.event_name == 'pull_request'
