@@ -18,6 +18,9 @@ on:
     paths:
       - .github/workflows/goreleaser.yaml
       - .goreleaser.yaml
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
       - mise.toml
 
 jobs:

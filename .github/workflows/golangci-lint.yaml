@@ -5,11 +5,13 @@ permissions: { contents: read }
 
 on:
   workflow_dispatch: {}
-  pull_request:
+  push:
     paths:
       - .github/workflows/golangci-lint.yaml
       - .golangci.yaml
       - "**.go"
+      - "go.mod"
+      - "go.sum"
       - mise.toml
 
 jobs:
@@ -23,4 +25,4 @@ jobs:
         uses: jdx/mise-action@v2.1.2
 
       - name: Run golangci-lint
-        run: golangci-lint run
+        run: mise exec -- golangci-lint run

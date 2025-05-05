@@ -5,7 +5,7 @@ permissions: { contents: read }
 
 on:
   workflow_dispatch: {}
-  pull_request:
+  push:
     paths:
       - ".github/workflows/*.yaml"
       - mise.toml
@@ -21,4 +21,4 @@ jobs:
         uses: jdx/mise-action@4d056cf31b20dbda64e7e44dc5da5565707b00d3 # v2.1.2
 
       - name: Run actionlint
-        run: actionlint
+        run: mise exec -- actionlint
