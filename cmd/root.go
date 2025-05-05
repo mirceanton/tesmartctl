@@ -45,7 +45,7 @@ func initConfig() {
 
 		// Check if .config directory exists and create it if not
 		configDir := filepath.Join(home, ".config")
-		if err := os.MkdirAll(configDir, 0755); err != nil {
+		if err := os.MkdirAll(configDir, 0o755); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
