@@ -8,7 +8,7 @@ on:
   push:
     paths:
       - ".github/workflows/*.yaml"
-      - mise.toml
+      - ".mise.toml"
 
 jobs:
   actionlint:
